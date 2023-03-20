@@ -1,9 +1,30 @@
+import { useState } from "react";
 import "./Main.css";
 
-function SendEther() {
+function SendEther({ web3, account }) {
+  const [receipt, setReceipt] = useState({});
+  const [toggle, setToggle] = useState(false);
+
+  function sendEther(event) {
+    event.preventDefault();
+    const _to = document.querySelector("#to").value;
+    const _value = document.querySelector("#value").value;
+    const weiValue = web3.utils.toWei(_value, "ether");
+    web3.eth
+      .sendTransaction({
+        from: account,
+        to: _to,
+        value: weiValue,
+      })
+      .then(function (receipt) {
+        setReceipt(receipt);
+        setToggle(true);
+        console.log(receipt);
+      });
+  }
   return (
     <>
-      <form className="box">
+      <form className="box" onSubmit={sendEther}>
         <p className="label">
           <label htmlFor="">Enter Receiver's Address</label>
           <input className="receiver" type="text" id="to"></input>
@@ -20,6 +41,14 @@ function SendEther() {
       <div className="box">
         <pre className="json">
           <h3>(Json Response)</h3>
+          <code>
+            {toggle &&
+              JSON.stringify(
+                receipt,
+                ["transactionHash", "blockHash", "blockNumber", "gasUsed"],
+                2
+              )}
+          </code>
         </pre>
       </div>
     </>
